@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lanzá la Zanahoria - Arkana Games</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Fondo hielo con nieve */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #2d3561 25%, #1a1a2e 50%, #2d3561 75%, #1a1a2e 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      overflow-y: auto;
+      position: relative;
+      padding: 20px 10px;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: #fff;
+      font-size: 1em;
+      pointer-events: none;
+      animation: snowfall linear infinite;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+      z-index: 1;
+    }
+
+    @keyframes snowfall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0.3;
+      }
+    }
+
+    /* Preloader */
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1a1a2e 0%, #2d3561 50%, #1a1a2e 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+
+    #preloader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .preloader-logo {
+      max-width: 120px;
+      height: auto;
+      margin-bottom: 30px;
+      animation: pulse 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px rgba(135, 206, 250, 0.5));
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(135, 206, 250, 0.5)); }
+      50% { transform: scale(1.05); filter: drop-shadow(0 0 30px rgba(135, 206, 250, 0.8)); }
+    }
+
+    .progress-bar-container {
+      width: 80%;
+      max-width: 400px;
+      height: 10px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(135, 206, 250, 0.3), inset 0 2px 5px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(135, 206, 250, 0.4);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #87ceeb, #e0f7ff, #87ceeb);
+      background-size: 200% 100%;
+      animation: shimmer 2s linear infinite;
+      width: 0%;
+      transition: width 0.1s ease;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(135, 206, 250, 0.8);
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    #game-container {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      width: 100%;
+      max-width: 500px;
+      z-index: 10;
+    }
+
+    #game-container.visible {
+      opacity: 1;
+    }
+
+    .logo {
+      max-width: 80px;
+      height: auto;
+      display: block;
+      margin: 0 auto 20px;
+      filter: drop-shadow(0 0 15px rgba(135, 206, 250, 0.4));
+    }
+
+    .badge {
+      background: linear-gradient(135deg, #2e7d32, #43a047, #2e7d32);
+      background-size: 200% 100%;
+      animation: badgeShine 3s ease-in-out infinite;
+      color: #fff;
+      padding: 12px 30px;
+      border-radius: 50px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 25px rgba(67, 160, 71, 0.6), 0 4px 15px rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(135, 206, 250, 0.3);
+    }
+
+    @keyframes badgeShine {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* Título hielo */
+    h1 {
+      font-family: 'Fredoka', sans-serif;
+      font-size: clamp(32px, 6vw, 48px);
+      font-weight: 700;
+      text-align: center;
+      background: linear-gradient(135deg, #e0f7ff, #87ceeb, #b0e0e6, #87ceeb, #e0f7ff);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+      animation: iceShimmer 4s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px rgba(135, 206, 250, 0.9)) 
+              drop-shadow(0 0 40px rgba(173, 216, 230, 0.6))
+              drop-shadow(2px 2px 4px rgba(255, 255, 255, 0.5));
+      position: relative;
+    }
+
+    @keyframes iceShimmer {
+      0%, 100% { 
+        background-position: 0% 50%;
+        filter: drop-shadow(0 0 20px rgba(135, 206, 250, 0.9)) 
+                drop-shadow(0 0 40px rgba(173, 216, 230, 0.6))
+                drop-shadow(2px 2px 4px rgba(255, 255, 255, 0.5));
+      }
+      50% { 
+        background-position: 100% 50%;
+        filter: drop-shadow(0 0 30px rgba(135, 206, 250, 1)) 
+                drop-shadow(0 0 50px rgba(173, 216, 230, 0.8))
+                drop-shadow(3px 3px 6px rgba(255, 255, 255, 0.7));
+      }
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #b0e0e6;
+      font-size: clamp(14px, 3vw, 16px);
+      margin-bottom: 30px;
+      line-height: 1.5;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5), 0 0 10px rgba(135, 206, 250, 0.5);
+    }
+
+    /* Contenedor del juego */
+    .game-area {
+      background: linear-gradient(135deg, rgba(30, 40, 60, 0.9), rgba(40, 55, 80, 0.95));
+      border-radius: 25px;
+      padding: 30px 20px;
+      box-shadow: 
+        0 0 40px rgba(135, 206, 250, 0.4),
+        0 10px 50px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(135, 206, 250, 0.3);
+      border: 3px solid;
+      border-image: linear-gradient(135deg, #87ceeb, #b0e0e6, #87ceeb) 1;
+      position: relative;
+      overflow: hidden;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .game-area::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #87ceeb, transparent, #b0e0e6, transparent, #87ceeb);
+      background-size: 300% 300%;
+      animation: borderGlow 4s linear infinite;
+      border-radius: 25px;
+      z-index: -1;
+      opacity: 0.6;
+    }
+
+    @keyframes borderGlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .snowman-container {
+      position: relative;
+      width: 250px;
+      height: 350px;
+      margin: 20px auto;
+      filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.4));
+    }
+
+    .snowman {
+      width: 100%;
+      height: 100%;
+    }
+
+    .carrot-track {
+      position: absolute;
+      top: 45px; /* BASE: altura buena para móvil */
+      left: 0;
+      right: 0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .carrot {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      left: 0;
+      animation: moveCarrot 2s linear infinite;
+      transition: none;
+      filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.8)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+    }
+
+    /* Solo animación de aterrizaje; la posición (left) queda congelada por JS */
+    .carrot.stopped {
+      animation: carrotLanded 0.5s ease-out forwards;
+    }
+
+    @keyframes carrotLanded {
+      0% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.3) rotate(10deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    @keyframes moveCarrot {
+      0% { left: 0; }
+      100% { left: calc(100% - 40px); }
+    }
+
+    .target-zone {
+      position: absolute;
+      top: 45px; /* misma altura que la zanahoria */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 60px;
+      border: none;
+      box-shadow: none;
+      background: transparent;
+      animation: none;
+      pointer-events: none;
+    }
+
+    /* Botón lanzar */
+    .launch-btn {
+      background: linear-gradient(135deg, #87ceeb, #b0e0e6, #87ceeb);
+      background-size: 200% 100%;
+      animation: buttonShine 3s ease-in-out infinite;
+      color: #1a1a2e;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      padding: 18px 50px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 
+        0 0 30px rgba(135, 206, 250, 0.6),
+        0 6px 20px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 20px;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid rgba(173, 216, 230, 0.8);
+    }
+
+    @keyframes buttonShine {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .launch-btn::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: sparkle 3s linear infinite;
+    }
+
+    @keyframes sparkle {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .launch-btn::after {
+      content: '🎯';
+      margin-left: 8px;
+    }
+
+    .launch-btn:hover:not(:disabled) {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 
+        0 0 40px rgba(135, 206, 250, 0.8),
+        0 8px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .launch-btn:active:not(:disabled) {
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    .launch-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      animation: none;
+    }
+
+    .result-message {
+      margin-top: 20px;
+      padding: 15px 25px;
+      border-radius: 15px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 16px;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 25px rgba(135, 206, 250, 0.4);
+      border: 2px solid;
+    }
+
+    .result-message.perfect {
+      background: linear-gradient(135deg, #87ceeb, #b0e0e6);
+      color: #1a1a2e;
+      border-color: #add8e6;
+      animation: perfectGlow 1s ease-in-out infinite;
+    }
+
+    @keyframes perfectGlow {
+      0%, 100% { box-shadow: 0 0 25px rgba(135, 206, 250, 0.6); }
+      50% { box-shadow: 0 0 40px rgba(135, 206, 250, 0.9); }
+    }
+
+    .result-message.good {
+      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      color: white;
+      border-color: #2e7d32;
+      box-shadow: 0 0 25px rgba(76, 175, 80, 0.5);
+    }
+
+    .result-message.basic {
+      background: linear-gradient(135deg, #ff9800, #ffa726);
+      color: white;
+      border-color: #e65100;
+      box-shadow: 0 0 25px rgba(255, 152, 0, 0.5);
+    }
+
+    /* Modal premio */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, rgba(30, 40, 60, 0.98), rgba(40, 55, 80, 0.98));
+      border-radius: 25px;
+      padding: 40px 30px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 
+        0 0 60px rgba(135, 206, 250, 0.6),
+        0 15px 60px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(135, 206, 250, 0.4),
+        inset 0 0 60px rgba(135, 206, 250, 0.1);
+      animation: modalAppear 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      border: 3px solid;
+      border-image: linear-gradient(135deg, #87ceeb, #b0e0e6, #87ceeb) 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(135, 206, 250, 0.3), transparent);
+      animation: modalShine 3s ease-in-out infinite;
+    }
+
+    @keyframes modalShine {
+      0% { left: -100%; }
+      50%, 100% { left: 100%; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modalAppear {
+      from { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+      to { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    .modal-icon {
+      font-size: 70px;
+      margin-bottom: 20px;
+      animation: iconBounce 1s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px rgba(135, 206, 250, 0.6));
+    }
+
+    @keyframes iconBounce {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.1); }
+    }
+
+    .modal-title {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #e0f7ff, #87ceeb, #b0e0e6, #87ceeb, #e0f7ff);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+      animation: iceShimmer 4s ease-in-out infinite;
+      filter: drop-shadow(0 0 15px rgba(135, 206, 250, 0.8));
+    }
+
+    .prize-display {
+      background: linear-gradient(135deg, #87ceeb, #b0e0e6, #add8e6, #87ceeb);
+      background-size: 300% 300%;
+      animation: prizeGradient 4s ease infinite;
+      color: #1a1a2e;
+      font-size: 36px;
+      font-weight: 700;
+      padding: 25px;
+      border-radius: 20px;
+      margin: 20px 0;
+      box-shadow: 
+        0 0 40px rgba(135, 206, 250, 0.8),
+        0 4px 20px rgba(0, 0, 0, 0.4),
+        inset 0 2px 0 rgba(255, 255, 255, 0.5),
+        inset 0 0 30px rgba(255, 255, 255, 0.2);
+      border: 3px solid #add8e6;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes prizeGradient {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .prize-display::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
+      animation: prizeShine 3s linear infinite;
+    }
+
+    @keyframes prizeShine {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .modal-message {
+      color: #b0e0e6;
+      font-size: 16px;
+      margin-bottom: 25px;
+      line-height: 1.5;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .accept-btn {
+      background: linear-gradient(135deg, #2e7d32, #43a047, #2e7d32);
+      background-size: 200% 100%;
+      animation: acceptBtnShine 3s ease-in-out infinite;
+      color: white;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      padding: 15px 40px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 
+        0 0 25px rgba(67, 160, 71, 0.6),
+        0 6px 20px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      border: 2px solid rgba(135, 206, 250, 0.3);
+    }
+
+    @keyframes acceptBtnShine {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .accept-btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 
+        0 0 35px rgba(67, 160, 71, 0.8),
+        0 8px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .accept-btn:active {
+      transform: translateY(0) scale(1);
+    }
+
+    .confetti {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      pointer-events: none;
+      z-index: 9999;
+      animation: confettiFall 3s linear forwards;
+      box-shadow: 0 0 8px rgba(135, 206, 250, 0.6);
+    }
+
+    @keyframes confettiFall {
+      to {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    .already-played {
+      text-align: center;
+      padding: 30px;
+      background: linear-gradient(135deg, rgba(135, 206, 250, 0.2), rgba(173, 216, 230, 0.3));
+      border-radius: 20px;
+      border: 3px solid #87ceeb;
+      margin-top: 20px;
+      box-shadow: 0 0 30px rgba(135, 206, 250, 0.4);
+    }
+
+    .already-played h2 {
+      color: #87ceeb;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 24px;
+      margin-bottom: 15px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .already-played p {
+      color: #b0e0e6;
+      font-size: 16px;
+      font-weight: 600;
+      text-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Ajuste de posición para PC / pantallas anchas */
+    @media (min-width: 768px) {
+      .carrot-track,
+      .target-zone {
+        top: 80px;
+      }
+    }
+
+    /* Ajustes móviles */
+    @media (max-width: 480px) {
+      body {
+        padding: 6px 0 8px;
+        align-items: flex-start;
+        height: 100vh;
+        overflow-y: hidden;
+      }
+
+      #game-container {
+        margin: 0;
+        height: 100vh;
+        max-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+
+      .logo {
+        max-width: 65px;
+        margin-bottom: 6px;
+      }
+
+      .badge {
+        font-size: 11px;
+        padding: 6px 16px;
+        margin-bottom: 8px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 6px;
+      }
+
+      .subtitle {
+        font-size: 12px;
+        margin-bottom: 10px;
+        line-height: 1.3;
+      }
+
+      .game-area {
+        min-height: 320px;
+        padding: 16px 12px;
+      }
+
+      .snowman-container {
+        width: 170px;
+        height: 230px;
+        margin: 4px auto 6px;
+      }
+
+      .launch-btn {
+        font-size: 16px;
+        padding: 12px 30px;
+        margin-top: 8px;
+      }
+
+      .result-message {
+        font-size: 13px;
+        padding: 10px 14px;
+        margin-top: 8px;
+        min-height: 38px;
+      }
+
+      .already-played {
+        padding: 16px 12px;
+        margin-top: 10px;
+      }
+
+      .already-played h2 {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+
+      .already-played p {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Snowflakes container -->
+  <div id="snowflakes"></div>
+
+  <div id="preloader">
+    <img src="assets/logo.png" alt="Arkana Games" class="preloader-logo">
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+
+  <div id="game-container">
+    <img src="assets/logo.png" alt="Arkana Games" class="logo">
+    
+    <div class="badge">
+      🎄 PROMOCIÓN ESPECIAL DE NAVIDAD 🎄
+    </div>
+
+    <h1>Lanzá la Zanahoria</h1>
+    <p class="subtitle">¡Ayudá al muñeco de nieve a encontrar su nariz perfecta y ganá tu premio!</p>
+
+    <div class="game-area">
+      <div class="snowman-container">
+        <div class="target-zone"></div>
+        
+        <div class="carrot-track">
+          <svg class="carrot" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="carrotGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#ff8c42;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#ff6b35;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <polygon points="10,50 90,35 90,65" fill="url(#carrotGradient)"/>
+            <line x1="10" y1="40" x2="5" y2="35" stroke="#4caf50" stroke-width="3"/>
+            <line x1="10" y1="45" x2="3" y2="42" stroke="#4caf50" stroke-width="3"/>
+            <line x1="10" y1="55" x2="3" y2="58" stroke="#4caf50" stroke-width="3"/>
+            <line x1="10" y1="60" x2="5" y2="65" stroke="#4caf50" stroke-width="3"/>
+          </svg>
+        </div>
+
+        <svg class="snowman" viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="snowGradient1" cx="50%" cy="50%">
+              <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#e3f2fd;stop-opacity:1" />
+            </radialGradient>
+            <radialGradient id="snowGradient2" cx="50%" cy="50%">
+              <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#e8f5e9;stop-opacity:1" />
+            </radialGradient>
+          </defs>
+          
+          <ellipse cx="100" cy="240" rx="70" ry="60" fill="url(#snowGradient1)" stroke="#b3e5fc" stroke-width="2"/>
+          <ellipse cx="100" cy="170" rx="55" ry="50" fill="url(#snowGradient1)" stroke="#b3e5fc" stroke-width="2"/>
+          <circle cx="100" cy="90" r="45" fill="url(#snowGradient2)" stroke="#b3e5fc" stroke-width="2"/>
+          
+          <rect x="70" y="125" width="60" height="15" fill="#d32f2f" rx="3"/>
+          <path d="M 130 130 L 145 125 L 145 145 L 135 140 Z" fill="#c62828"/>
+          <path d="M 130 132 L 145 127 L 145 147 L 135 142 Z" fill="#b71c1c"/>
+          
+          <circle cx="85" cy="85" r="5" fill="#212121"/>
+          <circle cx="115" cy="85" r="5" fill="#212121"/>
+          <circle cx="87" cy="83" r="2" fill="#ffffff" opacity="0.6"/>
+          <circle cx="117" cy="83" r="2" fill="#ffffff" opacity="0.6"/>
+          
+          <circle cx="85" cy="105" r="3" fill="#424242"/>
+          <circle cx="92" cy="108" r="3" fill="#424242"/>
+          <circle cx="100" cy="110" r="3" fill="#424242"/>
+          <circle cx="108" cy="108" r="3" fill="#424242"/>
+          <circle cx="115" cy="105" r="3" fill="#424242"/>
+          
+          <circle cx="100" cy="155" r="4" fill="#212121"/>
+          <circle cx="100" cy="170" r="4" fill="#212121"/>
+          <circle cx="100" cy="185" r="4" fill="#212121"/>
+          
+          <rect x="60" y="45" width="80" height="8" fill="#212121" rx="2"/>
+          <rect x="75" y="20" width="50" height="30" fill="#424242" rx="2"/>
+          <rect x="77" y="22" width="46" height="5" fill="#d32f2f"/>
+          
+          <line x1="45" y1="165" x2="15" y2="145" stroke="#8d6e63" stroke-width="5" stroke-linecap="round"/>
+          <line x1="15" y1="145" x2="5" y2="135" stroke="#8d6e63" stroke-width="4" stroke-linecap="round"/>
+          <line x1="15" y1="145" x2="10" y2="155" stroke="#8d6e63" stroke-width="4" stroke-linecap="round"/>
+          
+          <line x1="155" y1="165" x2="185" y2="145" stroke="#8d6e63" stroke-width="5" stroke-linecap="round"/>
+          <line x1="185" y1="145" x2="195" y2="135" stroke="#8d6e63" stroke-width="4" stroke-linecap="round"/>
+          <line x1="185" y1="145" x2="190" y2="155" stroke="#8d6e63" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <button class="launch-btn" id="launchBtn">Lanzar</button>
+      
+      <div class="result-message" id="resultMessage"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="prizeModal">
+    <div class="modal-content">
+      <div class="modal-icon" id="modalIcon">🎉</div>
+      <h2 class="modal-title" id="modalTitle">¡Felicitaciones!</h2>
+      <div class="prize-display" id="prizeDisplay"></div>
+      <p class="modal-message" id="modalMessage"></p>
+      <button class="accept-btn" onclick="closeModal()">Aceptar Premio</button>
+    </div>
+  </div>
+
+  <!-- Audios -->
+  <audio id="bgAudio" src="assets/bg.mp3" loop></audio>
+  <audio id="launchAudio" src="assets/launch.mp3"></audio>
+  <audio id="popupAudio" src="assets/popup.mp3"></audio>
+
+  <script>
+    let progress = 0;
+    const progressBar = document.getElementById('progressBar');
+    const preloader = document.getElementById('preloader');
+    const gameContainer = document.getElementById('game-container');
+
+    const STORAGE_PREFIX = 'snowman_carrotaa_';
+    const LAST_PLAYED_KEY = STORAGE_PREFIX + 'last_played';
+    const PRIZE_KEY = STORAGE_PREFIX + 'prize';
+
+    const bgAudio = document.getElementById('bgAudio');
+    const launchAudio = document.getElementById('launchAudio');
+    const popupAudio = document.getElementById('popupAudio');
+    let audioInitialized = false;
+
+    function initAudioOnce() {
+      if (audioInitialized) return;
+      audioInitialized = true;
+      if (bgAudio) {
+        bgAudio.currentTime = 0;
+        bgAudio.play().catch(() => {});
+      }
+    }
+
+    document.addEventListener('click', initAudioOnce, { once: true });
+    document.addEventListener('touchstart', initAudioOnce, { once: true });
+
+    const loadInterval = setInterval(() => {
+      progress += Math.random() * 30;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(loadInterval);
+        setTimeout(() => {
+          preloader.classList.add('hidden');
+          gameContainer.classList.add('visible');
+          checkIfAlreadyPlayed();
+        }, 500);
+      }
+      progressBar.style.width = progress + '%';
+    }, 200);
+
+    function createSnowflakes() {
+      const container = document.getElementById('snowflakes');
+      for (let i = 0; i < 50; i++) {
+        const snowflake = document.createElement('div');
+        snowflake.className = 'snowflake';
+        snowflake.textContent = '❄';
+        snowflake.style.left = Math.random() * 100 + '%';
+        snowflake.style.fontSize = (Math.random() * 0.5 + 0.5) + 'em';
+        snowflake.style.animationDuration = (Math.random() * 3 + 4) + 's';
+        snowflake.style.animationDelay = Math.random() * 5 + 's';
+        snowflake.style.opacity = Math.random() * 0.6 + 0.4;
+        container.appendChild(snowflake);
+      }
+    }
+    createSnowflakes();
+
+    const launchBtn = document.getElementById('launchBtn');
+    const carrot = document.querySelector('.carrot');
+    const resultMessage = document.getElementById('resultMessage');
+    const prizeModal = document.getElementById('prizeModal');
+    let hasPlayed = false;
+
+    // ✅ FIX RESPONSIVE: referencias + guardado "ratio" + reposicionado en resize
+    const carrotTrack = document.querySelector('.carrot-track');
+    const targetZone = document.querySelector('.target-zone');
+    const snowmanContainer = document.querySelector('.snowman-container');
+
+    function storeCarrotCenterRatio() {
+      if (!carrotTrack || !carrot) return;
+
+      const trackW = carrotTrack.getBoundingClientRect().width || 1;
+      const leftPx = parseFloat(carrot.style.left) || 0;
+      const carrotW = carrot.getBoundingClientRect().width || 40;
+
+      let ratio = (leftPx + carrotW / 2) / trackW;
+      ratio = Math.max(0, Math.min(1, ratio));
+
+      carrot.dataset.centerRatio = String(ratio);
+      carrot.dataset.stopped = '1';
+    }
+
+    function repositionStoppedCarrot() {
+      if (!carrotTrack || !carrot) return;
+      if (carrot.dataset.stopped !== '1') return;
+
+      const ratio = parseFloat(carrot.dataset.centerRatio);
+      if (!Number.isFinite(ratio)) return;
+
+      const trackRect = carrotTrack.getBoundingClientRect();
+      const trackW = trackRect.width || 1;
+      const carrotW = carrot.getBoundingClientRect().width || 40;
+
+      let centerX = ratio * trackW;
+      let leftPx = centerX - carrotW / 2;
+
+      const maxLeft = Math.max(0, trackW - carrotW);
+      leftPx = Math.max(0, Math.min(leftPx, maxLeft));
+
+      carrot.style.left = `${leftPx}px`;
+    }
+
+    let _resizeTO = null;
+    function scheduleReposition() {
+      clearTimeout(_resizeTO);
+      _resizeTO = setTimeout(() => {
+        repositionStoppedCarrot();
+      }, 80);
+    }
+
+    window.addEventListener('resize', scheduleReposition);
+    window.addEventListener('orientationchange', scheduleReposition);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', scheduleReposition);
+      window.visualViewport.addEventListener('scroll', scheduleReposition);
+    }
+    // ✅ FIN FIX RESPONSIVE
+
+    const prizes = [
+      { name: 'Bono 200%', weight: 5, tier: 'perfect' },
+      { name: 'Bono 150%', weight: 15, tier: 'good' },
+      { name: 'Bono 100%', weight: 40, tier: 'basic' },
+      { name: 'Bono a Elección', weight: 8, tier: 'perfect' },
+      { name: 'Bono Sorpresa', weight: 32, tier: 'good' }
+    ];
+
+    function getWeightedRandomPrize() {
+      const totalWeight = prizes.reduce((sum, prize) => sum + prize.weight, 0);
+      let random = Math.random() * totalWeight;
+      
+      for (const prize of prizes) {
+        if (random < prize.weight) {
+          return prize;
+        }
+        random -= prize.weight;
+      }
+      return prizes[prizes.length - 1];
+    }
+
+    function checkIfAlreadyPlayed() {
+      const today = new Date().toDateString();
+      const lastPlayed = localStorage.getItem(LAST_PLAYED_KEY);
+      
+      if (lastPlayed === today) {
+        const savedPrize = localStorage.getItem(PRIZE_KEY);
+        showAlreadyPlayedMessage(savedPrize);
+        hasPlayed = true;
+        launchBtn.disabled = true;
+      }
+    }
+
+    function showAlreadyPlayedMessage(prize) {
+      const gameArea = document.querySelector('.game-area');
+      const alreadyPlayedDiv = document.createElement('div');
+      alreadyPlayedDiv.className = 'already-played';
+      alreadyPlayedDiv.innerHTML = `
+        <h2>❄️ Ya jugaste hoy ❄️</h2>
+        <p>Tu premio de hoy fue: <strong>${prize}</strong></p>
+        <p style="margin-top: 10px;">¡Vuelve mañana para una nueva oportunidad!</p>
+      `;
+      gameArea.appendChild(alreadyPlayedDiv);
+    }
+
+    launchBtn.addEventListener('click', () => {
+      if (hasPlayed) return;
+
+      if (launchAudio) {
+        launchAudio.currentTime = 0;
+        launchAudio.play().catch(() => {});
+      }
+
+      // Congelar la posición actual de la zanahoria donde estaba al hacer clic
+      const computedLeft = getComputedStyle(carrot).left;
+      carrot.style.left = computedLeft;
+
+      // ✅ Guardamos "ratio" para que si cambia el viewport (PC<->móvil) se reubique igual
+      storeCarrotCenterRatio();
+
+      carrot.classList.add('stopped');
+      launchBtn.disabled = true;
+
+      // Reposicionamos una vez por si el browser redondeó px
+      repositionStoppedCarrot();
+
+      const carrotRect = carrot.getBoundingClientRect();
+      const targetRect = targetZone.getBoundingClientRect();
+      const snowmanRect = snowmanContainer.getBoundingClientRect();
+
+      const carrotCenter = carrotRect.left + carrotRect.width / 2;
+      const targetCenter = targetRect.left + targetRect.width / 2;
+      const distance = Math.abs(carrotCenter - targetCenter);
+
+      // 🔧 AJUSTE RESPONSIVE: usamos proporción de la distancia sobre el ancho del muñeco
+      const distanceRatio = distance / snowmanRect.width;
+
+      let accuracy, prize, message;
+      
+      if (distanceRatio < 0.08) {
+        accuracy = 'perfect';
+        prize = getWeightedRandomPrize();
+        message = '🎯 ¡PERFECTO! ¡Nariz en el centro exacto!';
+      } else if (distanceRatio < 0.20) {
+        accuracy = 'good';
+        prize = getWeightedRandomPrize();
+        message = '👍 ¡Muy bien! Nariz casi perfecta';
+      } else {
+        accuracy = 'basic';
+        prize = getWeightedRandomPrize();
+        message = '😅 Nariz un poco chueca, ¡pero igual hay premio!';
+      }
+
+      resultMessage.textContent = message;
+      resultMessage.className = `result-message ${accuracy}`;
+
+      setTimeout(() => {
+        showPrizeModal(prize);
+        createConfetti();
+      }, 1500);
+    });
+
+    function showPrizeModal(prize) {
+      if (bgAudio) {
+        bgAudio.pause();
+      }
+      if (popupAudio) {
+        popupAudio.currentTime = 0;
+        popupAudio.play().catch(() => {});
+      }
+
+      document.getElementById('modalIcon').textContent = '🎁';
+      document.getElementById('modalTitle').textContent = '¡Felicitaciones!';
+      document.getElementById('prizeDisplay').textContent = prize.name;
+      document.getElementById('modalMessage').textContent = '¡Has ganado un increíble premio! Contacta al soporte para reclamarlo.';
+      prizeModal.classList.add('active');
+
+      const today = new Date().toDateString();
+      localStorage.setItem(LAST_PLAYED_KEY, today);
+      localStorage.setItem(PRIZE_KEY, prize.name);
+      hasPlayed = true;
+    }
+
+    function closeModal() {
+      prizeModal.classList.remove('active');
+
+      if (popupAudio) {
+        popupAudio.pause();
+        popupAudio.currentTime = 0;
+      }
+      if (bgAudio) {
+        bgAudio.play().catch(() => {});
+      }
+    }
+
+    function createConfetti() {
+      const colors = ['#87ceeb', '#b0e0e6', '#add8e6', '#e0f7ff', '#ffffff'];
+      for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.top = '-10px';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 4000);
+      }
+    }
+  </script>
+
+</body>
+</html>
